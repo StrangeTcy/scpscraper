@@ -10,7 +10,7 @@ def get_single_scp(scp_id: str) -> BeautifulSoup:
   """Returns HTML code for the `page-content` div of a given SCP."""
   try:
     # Grab the HTML code.
-    r = urllib.request.urlopen(url=f'http://scp-wiki.wikidot.com/scp-{scp_id}')
+    r = urllib.request.urlopen(url=f'http://http://scpfoundation.net/scp-{scp_id}')
     
     # Return the organized content for parsing.
     return BeautifulSoup(r, 'lxml')
@@ -25,11 +25,11 @@ def _get_scp_name(scp_id: int) -> str:
   try:
     # Determine which series the SCP is in.
     if scp_id < 1000:
-      url = 'http://scp-wiki.wikidot.com/scp-series'
+      url = 'http://scpfoundation.net/scp-series'
     elif scp_id % 1000 == 0:
-      url = f'http://scp-wiki.wikidot.com/scp-series-{int(scp_id/1000+1)}'
+      url = f'http://scpfoundation.net/scp-series-{int(scp_id/1000+1)}'
     else:
-      url = f'http://scp-wiki.wikidot.com/scp-series-{ceil(scp_id/1000, 0)}'
+      url = f'http://scpfoundation.net/scp-series-{ceil(scp_id/1000, 0)}'
 
     # Grab the HTML and parse as needed.
     r = urllib.request.urlopen(url=url)
@@ -159,7 +159,7 @@ def parse_scp(soup: BeautifulSoup, scp_id: Union[str, int]) -> dict:
   tags = [tag.string for tag in tags_list if tag.string != '\n']
 
   # Get link to the discussion page.
-  discussion_link = 'http://www.scpwiki.com' + soup.find('a', id='discuss-button')['href']
+  discussion_link = 'http://scpfoundation.net' + soup.find('a', id='discuss-button')['href']
 
   return {
     'id': scp_id,
