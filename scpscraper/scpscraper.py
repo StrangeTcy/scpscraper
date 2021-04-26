@@ -17,7 +17,7 @@ def get_single_scp(scp_id: str) -> BeautifulSoup:
   
   # Error handling.
   except Exception as e:
-#     print(f'\nWARNING: Failed to access SCP Wiki page for SCP-{scp_id}. Error: {e}', file=sys.stderr)
+    print(f'\nWARNING: Failed to access SCP Wiki page for SCP-{scp_id}. Error: {e}', file=sys.stderr)
     return
 
 def _get_scp_name(scp_id: int) -> str:
@@ -47,17 +47,17 @@ def _get_scp_name(scp_id: int) -> str:
     # Handle 404 errors.
     except urllib.error.HTTPError as e:
       if e.code == 404:
-#         print(f'\nWARNING: Unavailable SCP Series for SCP-{scp_id}!', file=sys.stderr)
+        print(f'\nWARNING: Unavailable SCP Series for SCP-{scp_id}!', file=sys.stderr)
         return
 
     # Handle other HTTP errors.
       else:
-#         print(f'\nWARNING: Failed to access SCP Series page for SCP-{scp_id}. HTTP Status Code {e.code}. {e.read()}', file=sys.stderr)
+        print(f'\nWARNING: Failed to access SCP Series page for SCP-{scp_id}. HTTP Status Code {e.code}. {e.read()}', file=sys.stderr)
         return 
   
   # Even more error handling.
   except Exception as e:
-#     print(f'\nWARNING: Failed to access SCP Series page for SCP-{scp_id}. Request Error: {e}', file=sys.stderr)
+    print(f'\nWARNING: Failed to access SCP Series page for SCP-{scp_id}. Request Error: {e}', file=sys.stderr)
     return
 
 def parse_scp(soup: BeautifulSoup, scp_id: Union[str, int]) -> dict:
@@ -85,12 +85,12 @@ def parse_scp(soup: BeautifulSoup, scp_id: Union[str, int]) -> dict:
   
   # Error handling.
   except AttributeError:
-    # print(f'No main_image found for SCP-{scp_id}!')
+    print(f'No main_image found for SCP-{scp_id}!')
     main_image = None
   
   # More error handling.
   except KeyError:
-    # print(f'No main_image found for SCP-{scp_id}')
+    print(f'No main_image found for SCP-{scp_id}')
     main_image = None
 
   # Get image caption
@@ -99,12 +99,12 @@ def parse_scp(soup: BeautifulSoup, scp_id: Union[str, int]) -> dict:
   
   # Error handling.
   except AttributeError:
-    # print(f'No image_caption found for SCP-{scp_id}!')
+    print(f'No image_caption found for SCP-{scp_id}!')
     image_caption = None
   
   # Even more error handling.
   except KeyError:
-    # print(f'No image_caption found for SCP-{scp_id}')
+    print(f'No image_caption found for SCP-{scp_id}')
     image_caption = None
 
   # Get main content
@@ -146,7 +146,7 @@ def parse_scp(soup: BeautifulSoup, scp_id: Union[str, int]) -> dict:
   
   # Error handling.
   except AttributeError as e:
-    # print(f'Can\'t parse content of SCP-{scp_id}! Error: {e}')
+    print(f'Can\'t parse content of SCP-{scp_id}! Error: {e}')
     mapping = None
 
   # Get page info.
@@ -221,7 +221,7 @@ def get_scp_name(id: int) -> str:
   
   # Error handling
   except KeyError as e:
-#     print(f"\nWARNING: Failed to scrape SCP-{id}! Error: {e}", file=sys.stderr)
+    print(f"\nWARNING: Failed to scrape SCP-{id}! Error: {e}", file=sys.stderr)
     pass
 
 def scrape_scps(min_skip: int=0, max_skip: int=6000, tags: list=[], ai_dataset: bool=False, copy_to_drive: bool=False) -> None:
@@ -290,7 +290,7 @@ def scrape_scps(min_skip: int=0, max_skip: int=6000, tags: list=[], ai_dataset: 
             try:
               # Add <|endoftext|> token if it's a dataset for training AI.
               if ai_dataset:
-                out.write('Description: {}\n<|endoftext|>'.format(mylist["content"]["Description"].replace(j, 'XXXX')))
+                out.write('Описание: {}\n<|endoftext|>'.format(mylist["content"]["Description"].replace(j, 'XXXX')))
               else:
                 out.write(f'Description: {mylist["content"]["Description"]}\n')
 
@@ -298,7 +298,7 @@ def scrape_scps(min_skip: int=0, max_skip: int=6000, tags: list=[], ai_dataset: 
 
             # Error handling.
             except Exception as e:
-              # print(f'Failed to grab the description of SCP-{j}! Please grab it yourself! Error: {e}')
+              print(f'Failed to grab the description of SCP-{j}! Please grab it yourself! Error: {e}')
               pass
 
           # Append current SCP's conprocs to the conproc file.
@@ -308,7 +308,7 @@ def scrape_scps(min_skip: int=0, max_skip: int=6000, tags: list=[], ai_dataset: 
                 # Search keys for "Containment", output to conproc file if it matches.
                 if "containment" in k.lower():
                   if ai_dataset:
-                    out.write('Special Containment Procedures: {}\n<|endoftext|>\n'.format(mylist["content"][k].replace(j, 'XXXX')))
+                    out.write('Особые условия содержания: {}\n<|endoftext|>\n'.format(mylist["content"][k].replace(j, 'XXXX')))
                   else:
                     out.write(f'Special Containment Procedures: {mylist["content"][k]}\n')
 
