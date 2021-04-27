@@ -8,10 +8,9 @@ from scpscraper import gdrive
 
 def get_single_scp(scp_id: str) -> BeautifulSoup:
   """Returns HTML code for the `page-content` div of a given SCP."""
-  print (f"get_single_scp has recieved scp_id {scp_id}")
   try:
     # Grab the HTML code.
-    r = urllib.request.urlopen(url=f'http://scpfoundation.net/scp-{scp_id}')
+    r = urllib.request.urlopen(url=f'http://http://scpfoundation.net/scp-{scp_id}')
     
     # Return the organized content for parsing.
     return BeautifulSoup(r, 'lxml')
@@ -61,14 +60,9 @@ def _get_scp_name(scp_id: int) -> str:
     print(f'\nWARNING: Failed to access SCP Series page for SCP-{scp_id}. Request Error: {e}', file=sys.stderr)
     return
 
-
 def parse_scp(soup: BeautifulSoup, scp_id: Union[str, int]) -> dict:
   """Parses the HTML content of a page on the SCP wiki. Internal function, shouldn't need to be called by a user."""
   # Just to get this out of the way...
-  
-  # input (f"So in parse_scp we're dealing with scp-{scp_id}. \
-        # We're also dealing with soup {soup}")
-
   if soup is None:
     return None
 
@@ -78,13 +72,12 @@ def parse_scp(soup: BeautifulSoup, scp_id: Union[str, int]) -> dict:
   
   # Error handling.
   except AttributeError:
-    print(f'No rating found for SCP-{scp_id}!')
+    # print(f'No rating found for SCP-{scp_id}!')
     rating = 0
 
   # Get page-content block.
   content = soup.find('div', id='page-content')
-  print(content)
-  # input ("That's our content")
+  # print(content)
 
   # Get main image (if it exists).
   try:
@@ -119,22 +112,17 @@ def parse_scp(soup: BeautifulSoup, scp_id: Union[str, int]) -> dict:
     # Initial variable definitions.
     mapping = {}
     key = None
-    prgrphs = content.find_all('p')
-    # input(f"We found paragraphs {prgrphs}. \nProcessing paragraphs...")
+    # print(content.find_all('p'))
 
     # Find all the paragraph elements.
-    for item in tqdm(prgrphs):
+    for item in content.find_all('p'):
       # Grab the paragraph element's first child.
       first_child = item.next
-      print (f"We've found first_child {first_child}")
       
       # Use bold portions as keys/identifiers for their sections.
       if first_child.name == 'strong':
         key = first_child.text.rstrip(': ')
-        thingy = first_child.next_sibling
-        print (f"Our thingy is {thingy}")
-        if thingy is not None:
-          value = thingy.strip(': ')
+        value = first_child.next_sibling.strip(': ')
       
       else:
         # Add subsequent paragraphs to the same section.
@@ -147,9 +135,6 @@ def parse_scp(soup: BeautifulSoup, scp_id: Union[str, int]) -> dict:
       
       # Put that all into the value for the key.
       mapping[key] = value
-
-    print (f"And now we have mapping {mapping}")
-    # input ("Ok?")
     
     # Remove the sections that didn't have keys.
     try:
@@ -159,10 +144,6 @@ def parse_scp(soup: BeautifulSoup, scp_id: Union[str, int]) -> dict:
     except:
       pass
   
-
-     
-  
-
   # Error handling.
   except AttributeError as e:
     print(f'Can\'t parse content of SCP-{scp_id}! Error: {e}')
@@ -205,16 +186,13 @@ def get_scp(scp_id: Union[str, int]) -> dict:
   # Make the formatting nice for get_single_scp
   if int(scp_id) < 10:
     scp_id = f'00{scp_id}'
-    print (f"And now our scp_id is {scp_id}")
   
   elif int(scp_id) < 100:
     scp_id = f'0{scp_id}'
-    print (f"And now our scp_id is {scp_id}")
   
   # Get stuff we need from the page's HTML
   site_content = get_single_scp(str(scp_id))
-  # parsed_content = parse_scp(site_content, int(scp_id))
-  parsed_content = parse_scp(site_content, str(scp_id))
+  parsed_content = parse_scp(site_content, int(scp_id))
 
   # Get SCP's name and add it to parsed_content.
   if get_scp_name(int(scp_id)) is not None:
@@ -227,7 +205,6 @@ def get_scp(scp_id: Union[str, int]) -> dict:
     pass
   
   return parsed_content
-
 
 def get_scp_name(id: int) -> str:
   """
@@ -246,7 +223,6 @@ def get_scp_name(id: int) -> str:
   except KeyError as e:
     print(f"\nWARNING: Failed to scrape SCP-{id}! Error: {e}", file=sys.stderr)
     pass
-
 
 def scrape_scps(min_skip: int=0, max_skip: int=6000, tags: list=[], ai_dataset: bool=False, copy_to_drive: bool=False) -> None:
   """
@@ -277,9 +253,8 @@ def scrape_scps(min_skip: int=0, max_skip: int=6000, tags: list=[], ai_dataset: 
   for i in tqdm(range(min_skip, max_skip), "Fetching skips", total=max_skip, ncols=150, initial=min_skip, unit="skip", file=sys.stdout, bar_format='{desc}... {percentage:3.2f}% |{bar}|  [{remaining} remaining, {rate_fmt}]', smoothing=0.01875):
     # Nice number formatting.
     if i < 10:
-      # j = f'00{i}'
-      j = f'0{i}'
-    elif i > 10 and i < 100:
+      j = f'00{i}'
+    elif i < 100:
       j = f'0{i}'
     else:
       j = i
@@ -287,8 +262,6 @@ def scrape_scps(min_skip: int=0, max_skip: int=6000, tags: list=[], ai_dataset: 
     try:
       # Get all the things for the SCP.
       mylist = get_scp(i)
-      # input (f"Our list is {mylist}")
-      # mylist = get_scp(j)
       
       # Tag match checking code
       match = False
@@ -311,19 +284,15 @@ def scrape_scps(min_skip: int=0, max_skip: int=6000, tags: list=[], ai_dataset: 
           for k in keyslist:
             mylist["content"][k] = mylist["content"][k].replace(j, 'XXXX')
 
-        # lala = mylist["content"]["Description"]
-        # input (f"Our description is {lala}")
-
         try:
           # Append current SCP's description to the description file.
           with open('scp-descrips.txt', 'a') as out:
             try:
               # Add <|endoftext|> token if it's a dataset for training AI.
               if ai_dataset:
-                
-                out.write('Описание: {}\n<|endoftext|>'.format(mylist["content"]["Описание"].replace(j, 'XXXX')))
+                out.write('Описание: {}\n<|endoftext|>'.format(mylist["content"]["Description"].replace(j, 'XXXX')))
               else:
-                out.write(f'Описание: {mylist["content"]["Описание"]}\n')
+                out.write(f'Description: {mylist["content"]["Description"]}\n')
 
               out.write('\n')
 
@@ -337,11 +306,11 @@ def scrape_scps(min_skip: int=0, max_skip: int=6000, tags: list=[], ai_dataset: 
             try:
               for k in keyslist:
                 # Search keys for "Containment", output to conproc file if it matches.
-                if "содержания" in k.lower():
+                if "containment" in k.lower():
                   if ai_dataset:
                     out.write('Особые условия содержания: {}\n<|endoftext|>\n'.format(mylist["content"][k].replace(j, 'XXXX')))
                   else:
-                    out.write(f'Особые условия содержания: {mylist["content"][k]}\n')
+                    out.write(f'Special Containment Procedures: {mylist["content"][k]}\n')
 
                   # Add <|endoftext|> token if it's a dataset for training AI.
 
@@ -350,7 +319,7 @@ def scrape_scps(min_skip: int=0, max_skip: int=6000, tags: list=[], ai_dataset: 
 
             # Error handling.
             except:
-              print(f'Failed to grab the conprocs of SCP-{j}! It is probably not an article with a standard format! Please grab them yourself!')
+              # print(f'Failed to grab the conprocs of SCP-{j}! It is probably not an article with a standard format! Please grab them yourself!')
               pass
 
           try:
@@ -366,11 +335,11 @@ def scrape_scps(min_skip: int=0, max_skip: int=6000, tags: list=[], ai_dataset: 
 
                 # Handle nonexistent SCPs.
                 else:
-                  print(f'SCP-{j} doesn\'t exist yet!')
+                  # print(f'SCP-{j} doesn\'t exist yet!')
                   pass
 
               else:
-                print(f'SCP-{j} doesn\'t exist yet!')
+                # print(f'SCP-{j} doesn\'t exist yet!')
                 pass
 
           # Error handling.
@@ -390,7 +359,7 @@ def scrape_scps(min_skip: int=0, max_skip: int=6000, tags: list=[], ai_dataset: 
 
               for k in keyslist:
                 # Search keys for "Addendum", add to addendalist if it matches.
-                if "приложение" in k.lower():
+                if "addendum" in k.lower():
                   if ai_dataset:
                     addendalist.append(mylist["content"][k])
 
@@ -402,7 +371,7 @@ def scrape_scps(min_skip: int=0, max_skip: int=6000, tags: list=[], ai_dataset: 
               if ai_dataset:
                 for k in addendalist:
                   buffer = k.strip(': ')
-                  out.write('Приложение XXXX-XX: {}\n<|endoftext|>\n\n'.format(buffer.replace(j, 'XXXX')))
+                  out.write('Addendum XXXX-XX: {}\n<|endoftext|>\n\n'.format(buffer.replace(j, 'XXXX')))
 
               # Do the same for non-dataset.
               else:
