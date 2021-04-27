@@ -30,7 +30,7 @@ def _get_scp_name(scp_id: int) -> str:
     elif scp_id % 1000 == 0:
       url = f'http://scpfoundation.net/scp-series-{int(scp_id/1000+1)}'
     else:
-      url = f'http://scpfoundation.net/scp-series-{ceil(scp_id/1000, 0)}'
+      url = f'http://scpfoundation.net/scp-series-{max(ceil(scp_id/1000), 0)}'
 
     # Grab the HTML and parse as needed.
     r = urllib.request.urlopen(url=url)
